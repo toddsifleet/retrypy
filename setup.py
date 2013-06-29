@@ -5,5 +5,5 @@ setup(
     version = '1.0',
     author='Todd Siflet',
     author_email='todd.siflet@gmail.com',
-    py_modules = ['retry/retry'],
+    py_modules = ['retry.retry'],
 )
