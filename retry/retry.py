@@ -79,10 +79,10 @@ def retry(func, args = None, kwargs = None, exceptions = None, times = 5, wait =
 
     return _retry(partial(func, *args, **kwargs), exceptions, times, wait, include_error_and_count)
 
-def retry_me(exceptions = [Exception], times = 5, wait = 1):
+def retry_me(**decorator_kwargs):
     def wrap(func):
-        def wrapped(*args, **kwargs):
-            return retry(func, args, kwargs, exceptions, times, wait)
+        def wrapped(*func_args, **func_kwargs):
+            return retry(func, args = func_args, kwargs = func_kwargs, **decorator_kwargs)
 
         return wrapped
     return wrap

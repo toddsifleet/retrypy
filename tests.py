@@ -149,6 +149,30 @@ class Test__retry(unittest.TestCase):
         self.assertEqual(self.call_count, 4)
         self.assertEqual(result, "victory")
 
+class Test_decorator(unittest.TestCase):
+    def test_failure(self):
+        self.call_count = 0
+        @retry.retry_me(wait = 0)
+        def dummy_func():
+            self.call_count += 1
+            raise Exception("house")
+
+        self.assertRaises(Exception, dummy_func)
+        self.assertEqual(self.call_count, 5)
+    
+    def test_success(self):
+        @retry.retry_me(wait = 0)
+        def dummy_func():
+            return 10
+
+        self.assertEqual(dummy_func(), 10)
+
+    def test_function_args(self):
+        @retry.retry_me(wait = 0)
+        def dummy_func(arg_1, kwarg_1 = False):
+            return arg_1, kwarg_1
+
+        self.assertEqual(dummy_func(1, kwarg_1 = 2), (1, 2,))
 
 if __name__ == '__main__':
     unittest.main()
