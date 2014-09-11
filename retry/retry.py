@@ -1,16 +1,17 @@
 import re
 import time
-from functools import partial
+from inspect import isfunction
+from functools import partial, wraps
 
-always_true = lambda *_: True
+always_true = lambda *args, **kwargs: True
 
 
 def _parse_search(input):
-    if isinstance(input, str):
-        return lambda x: x in input
+    if isinstance(input, basestring):
+        return lambda x, **_: x in input
     elif isinstance(input, re._pattern_type):
-        return lambda x: input.search(x)
-    elif hasattr(input, '__call__'):
+        return lambda x, **_: input.search(x)
+    elif isfunction(input):
         return input
     raise TypeError("Matches must be strings, regex, or functions")
 
@@ -34,24 +35,20 @@ def _retryable(e, matches):
     return False
 
 
-def _retry(func, exceptions, times, wait, include_error_and_count):
+def _retry(func, exceptions, times, wait):
     exceptions, matches = _parse_exceptions(exceptions)
     previous_exception = None
     for n in xrange(times):
-        if n:
-            time.sleep(wait)
         try:
-            if include_error_and_count:
-                return func(
-                    count=n,
-                    previous_exception=previous_exception
-                )
-            else:
-                return func()
+            return func(
+                count=n,
+                previous_exception=previous_exception
+            )
         except exceptions as e:
             if not _retryable(e, matches):
                 raise e
             previous_exception = e
+        time.sleep(wait)
     raise previous_exception
 
 
@@ -62,7 +59,6 @@ def retry(
     exceptions=None,
     times=5,
     wait=1,
-    include_error_and_count=False
 ):
     '''
         A wrapper to automagically retry a function call if it fails
@@ -79,10 +75,6 @@ def retry(
                 [(ExceptionType1, Function) ...] => custom test function
             times: number of times to retry
             wait: number of seconds to wait between tries
-            include_error_and_count: If this is set the func must accept
-            atleast two args in addition to the ones supplied:
-                1.) count => The attempt number
-                2.) previous_exception => the previous exception raised
     '''
     if args is None:
         args = []
@@ -101,12 +93,12 @@ def retry(
         exceptions,
         times,
         wait,
-        include_error_and_count
     )
 
 
 def retry_me(**decorator_kwargs):
     def wrap(func):
+        @wraps(func)
         def wrapped(*func_args, **func_kwargs):
             return retry(
                 func,
