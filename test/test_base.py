@@ -55,98 +55,49 @@ class Test__parse_exceptions(unittest.TestCase):
         assert exceptions == tuple(map(lambda x: x[0], input))
 
 
-class Test__retryable(unittest.TestCase):
-    def test_empty_matches(self):
-        result = retry._retryable(Exception(''), [])
-        self.assertFalse(result)
-
-    def test_passing_case(self):
-        result = retry._retryable(Exception(''), [(Exception, lambda x: True)])
-        self.assertTrue(result)
-
-    def test_subclass_exception(self):
-        result = retry._retryable(TypeError(''), [(Exception, lambda x: True)])
-        self.assertTrue(result)
-
-    def test_failing_case(self):
-        result = retry._retryable(Exception(''), [(TypeError, lambda x: True)])
-        self.assertFalse(result)
-
-    def test_pass_exception_type_fail_match(self):
-        result = retry._retryable(
-            Exception(''),
-            [(Exception, lambda x: False)]
-        )
-        self.assertFalse(result)
-
-
 class Test_retry(unittest.TestCase):
-    def setUp(self):
-        def dummy_retry(*args):
-            return args
-
-        def dummy_partial(*args, **kwargs):
-            return args, kwargs
-
-        self.old_retry = retry._retry
-        retry._retry = dummy_retry
-        self.old_partial = retry.partial
-        retry.partial = dummy_partial
-
-    def tearDown(self):
-        retry._retry = self.old_retry
-        retry.partial = self.old_partial
 
     def test_just_func_supplied(self):
-        result = retry.retry(dummy_func)
-        ((func,), _), exceptions, times, wait = result
-        assert dummy_func == func
-        assert exceptions == [Exception]
-        assert times == 5
-        assert wait == 1
+        assert retry.retry(lambda: 'bar') == 'bar'
 
     def test_args_kwargs(self):
         test_args = (1, 2, 3)
         test_kwargs = {'foo': 'bar'}
         result = retry.retry(
-            dummy_func,
+            lambda *args, **kwargs: (args, kwargs),
             args=test_args,
             kwargs=test_kwargs
         )
-        results, exceptions, times, wait = result
+        assert result == (test_args, test_kwargs)
 
-        assert results[0][0] == dummy_func
-        assert results[0][1::] == test_args
-        assert results[1] == test_kwargs
-
-    def test_different_times(self):
-        self.assertRaises(TypeError, retry.retry, dummy_func, times=-1)
-        result = retry.retry(dummy_func, times=1)
-        assert result is None
-        _, _, times, _ = retry.retry(dummy_func, times=10)
-        assert times == 10
-
-
-class Test__retry(unittest.TestCase):
     def test_no_error(self):
-        result = retry._retry(
-            lambda count, previous_exception, **_: 100,
+        result = retry.retry(
+            lambda: 100,
             [],
+            {},
+            [Exception],
             10,
             1,
         )
-        assert result == 100
-        result = retry._retry(lambda **_: 100, [], 10, 1)
         assert result == 100
 
     def test_error_out(self):
         self.call_count = 0
 
-        def dummy_func(**kwargs):
+        def dummy_func():
             self.call_count += 1
             raise TypeError("FOOBAR")
 
-        self.assertRaises(TypeError, retry._retry, dummy_func, [], 5, 1)
+        self.assertRaises(
+            TypeError,
+            retry.retry,
+            dummy_func,
+            [],
+            {},
+            [ValueError],
+            5,
+            1,
+        )
         assert self.call_count == 1
 
     def test_catch_errors_and_retry(self):
@@ -158,8 +109,10 @@ class Test__retry(unittest.TestCase):
 
         self.assertRaises(
             TypeError,
-            retry._retry,
+            retry.retry,
             dummy_func,
+            [],
+            {},
             [Exception],
             5,
             0,
@@ -175,7 +128,14 @@ class Test__retry(unittest.TestCase):
                 raise TypeError("FOOBAR")
             return "victory"
 
-        result = retry._retry(dummy_func, [Exception], 5, 0)
+        result = retry.retry(
+            dummy_func,
+            [],
+            {},
+            [Exception],
+            5,
+            0
+        )
         assert self.call_count == 4
         assert result == "victory"
 
@@ -185,7 +145,7 @@ class Test_decorator(unittest.TestCase):
         self.call_count = 0
 
         @retry.retry(wait=0)
-        def dummy_func(**kwargs):
+        def dummy_func():
             self.call_count += 1
             raise Exception("house")
 
