@@ -3,7 +3,7 @@ import re
 import unittest
 
 
-def dummy_func():
+def dummy_func(*args, **kwargs):
     return
 
 
@@ -31,15 +31,15 @@ class Test__parse_search(unittest.TestCase):
 class Test__parse_exceptions(unittest.TestCase):
     def test_empty_list(self):
         result = retry._parse_exceptions([])
-        self.assertEqual(((), []), result)
+        assert ((), []) == result
 
     def test_no_match_functions(self):
         input = [Exception, TypeError]
         exceptions, matches = retry._parse_exceptions(input)
         for test_e, (result_e, f) in zip(input, matches):
             self.assertTrue(f(''))
-            self.assertEqual(test_e, result_e)
-        self.assertEqual(exceptions, tuple(input))
+            assert test_e == result_e
+        assert exceptions == tuple(input)
 
     def test_match_functions(self):
         f = lambda x: "house" in x
@@ -51,8 +51,8 @@ class Test__parse_exceptions(unittest.TestCase):
         for (test_e, _), (result_e, f) in zip(input, matches):
             self.assertFalse(f(''))
             self.assertTrue(f('test_house'))
-            self.assertEqual(test_e, result_e)
-        self.assertEqual(exceptions, tuple(map(lambda x: x[0], input)))
+            assert test_e == result_e
+        assert exceptions == tuple(map(lambda x: x[0], input))
 
 
 class Test__retryable(unittest.TestCase):
@@ -99,11 +99,11 @@ class Test_retry(unittest.TestCase):
 
     def test_just_func_supplied(self):
         result = retry.retry(dummy_func)
-        ((func,), _), exceptions, times, wait, include_error_and_count = result
-        self.assertEqual(dummy_func, func)
-        self.assertEqual(exceptions, [Exception])
-        self.assertEqual(times, 5)
-        self.assertEqual(wait, 1)
+        ((func,), _), exceptions, times, wait = result
+        assert dummy_func == func
+        assert exceptions == [Exception]
+        assert times == 5
+        assert wait == 1
 
     def test_args_kwargs(self):
         test_args = (1, 2, 3)
@@ -113,47 +113,46 @@ class Test_retry(unittest.TestCase):
             args=test_args,
             kwargs=test_kwargs
         )
-        results, exceptions, times, wait, include_error_and_count = result
+        results, exceptions, times, wait = result
 
-        self.assertEqual(results[0][0], dummy_func)
-        self.assertEqual(results[0][1::], test_args)
-        self.assertEqual(results[1], test_kwargs)
+        assert results[0][0] == dummy_func
+        assert results[0][1::] == test_args
+        assert results[1] == test_kwargs
 
     def test_different_times(self):
         self.assertRaises(TypeError, retry.retry, dummy_func, times=-1)
         result = retry.retry(dummy_func, times=1)
-        self.assertEqual(result, None)
-        _, _, times, _, _ = retry.retry(dummy_func, times=10)
-        self.assertEqual(times, 10)
+        assert result is None
+        _, _, times, _ = retry.retry(dummy_func, times=10)
+        assert times == 10
 
 
 class Test__retry(unittest.TestCase):
     def test_no_error(self):
         result = retry._retry(
-            lambda count, previous_exception: 100,
+            lambda count, previous_exception, **_: 100,
             [],
             10,
             1,
-            True
         )
-        self.assertEqual(result, 100)
-        result = retry._retry(lambda: 100, [], 10, 1, False)
-        self.assertEqual(result, 100)
+        assert result == 100
+        result = retry._retry(lambda **_: 100, [], 10, 1)
+        assert result == 100
 
     def test_error_out(self):
         self.call_count = 0
 
-        def dummy_func():
+        def dummy_func(**kwargs):
             self.call_count += 1
             raise TypeError("FOOBAR")
 
-        self.assertRaises(TypeError, retry._retry, dummy_func, [], 5, 1, False)
-        self.assertEqual(self.call_count, 1)
+        self.assertRaises(TypeError, retry._retry, dummy_func, [], 5, 1)
+        assert self.call_count == 1
 
     def test_catch_errors_and_retry(self):
         self.call_count = 0
 
-        def dummy_func():
+        def dummy_func(**kwargs):
             self.call_count += 1
             raise TypeError("FOOBAR")
 
@@ -164,22 +163,21 @@ class Test__retry(unittest.TestCase):
             [Exception],
             5,
             0,
-            False
         )
-        self.assertEqual(self.call_count, 5)
+        assert self.call_count == 5
 
     def test_catch_error_and_succeed(self):
         self.call_count = 0
 
-        def dummy_func():
+        def dummy_func(**kwargs):
             self.call_count += 1
             if self.call_count < 4:
                 raise TypeError("FOOBAR")
             return "victory"
 
-        result = retry._retry(dummy_func, [Exception], 5, 0, False)
-        self.assertEqual(self.call_count, 4)
-        self.assertEqual(result, "victory")
+        result = retry._retry(dummy_func, [Exception], 5, 0)
+        assert self.call_count == 4
+        assert result == "victory"
 
 
 class Test_decorator(unittest.TestCase):
@@ -187,23 +185,23 @@ class Test_decorator(unittest.TestCase):
         self.call_count = 0
 
         @retry.retry_me(wait=0)
-        def dummy_func():
+        def dummy_func(**kwargs):
             self.call_count += 1
             raise Exception("house")
 
         self.assertRaises(Exception, dummy_func)
-        self.assertEqual(self.call_count, 5)
+        assert self.call_count == 5
 
     def test_success(self):
         @retry.retry_me(wait=0)
-        def dummy_func():
+        def dummy_func(**kwargs):
             return 10
 
-        self.assertEqual(dummy_func(), 10)
+        assert dummy_func() == 10
 
     def test_function_args(self):
         @retry.retry_me(wait=0)
-        def dummy_func(arg_1, kwarg_1=False):
+        def dummy_func(arg_1, kwarg_1=False, **kwargs):
             return arg_1, kwarg_1
 
-        self.assertEqual(dummy_func(1, kwarg_1=2), (1, 2,))
+        assert dummy_func(1, kwarg_1=2) == (1, 2,)
