@@ -1,6 +1,5 @@
 import re
 import time
-from inspect import isfunction
 from functools import partial, wraps
 
 always_true = lambda *args, **kwargs: True
@@ -11,7 +10,7 @@ def _parse_search(input):
         return lambda x, *_: x in input
     elif isinstance(input, re._pattern_type):
         return lambda x, *_: input.search(x)
-    elif isfunction(input):
+    elif hasattr(input, '__call__'):
         return input
     raise TypeError("Matches must be strings, regex, or functions")
 
@@ -28,7 +27,7 @@ def _parse_exceptions(input):
     return tuple(exceptions), matches
 
 
-def _retryable(e, matches, count):
+def _should_retry(e, matches, count):
     for e_type, test in matches:
         if isinstance(e, e_type):
             return test(e.message, count)
@@ -42,7 +41,7 @@ def _retry(func, exceptions, times, wait):
         try:
             return func()
         except exceptions as e:
-            if not _retryable(e, matches, n):
+            if not _should_retry(e, matches, n):
                 raise e
             previous_exception = e
         time.sleep(wait)
@@ -50,7 +49,7 @@ def _retry(func, exceptions, times, wait):
 
 
 def retry(*args, **kwargs):
-    if args and isfunction(args[0]):
+    if args and hasattr(args[0], '__call__'):
         return _function(*args, **kwargs)
     return _decorator(*args, **kwargs)
 
