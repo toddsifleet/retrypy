@@ -184,7 +184,7 @@ class Test_decorator(unittest.TestCase):
     def test_failure(self):
         self.call_count = 0
 
-        @retry.retry_me(wait=0)
+        @retry.retry(wait=0)
         def dummy_func(**kwargs):
             self.call_count += 1
             raise Exception("house")
@@ -193,14 +193,14 @@ class Test_decorator(unittest.TestCase):
         assert self.call_count == 5
 
     def test_success(self):
-        @retry.retry_me(wait=0)
+        @retry.retry(wait=0)
         def dummy_func(**kwargs):
             return 10
 
         assert dummy_func() == 10
 
     def test_function_args(self):
-        @retry.retry_me(wait=0)
+        @retry.retry(wait=0)
         def dummy_func(arg_1, kwarg_1=False, **kwargs):
             return arg_1, kwarg_1
 

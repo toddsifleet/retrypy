@@ -52,7 +52,13 @@ def _retry(func, exceptions, times, wait):
     raise previous_exception
 
 
-def retry(
+def retry(*args, **kwargs):
+    if args and isfunction(args[0]):
+        return _function(*args, **kwargs)
+    return _decorator(*args, **kwargs)
+
+
+def _function(
     func,
     args=None,
     kwargs=None,
@@ -96,7 +102,7 @@ def retry(
     )
 
 
-def retry_me(**decorator_kwargs):
+def _decorator(**decorator_kwargs):
     def wrap(func):
         @wraps(func)
         def wrapped(*func_args, **func_kwargs):
