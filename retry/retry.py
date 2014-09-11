@@ -8,9 +8,9 @@ always_true = lambda *args, **kwargs: True
 
 def _parse_search(input):
     if isinstance(input, basestring):
-        return lambda x, **_: x in input
+        return lambda x, *_: x in input
     elif isinstance(input, re._pattern_type):
-        return lambda x, **_: input.search(x)
+        return lambda x, *_: input.search(x)
     elif isfunction(input):
         return input
     raise TypeError("Matches must be strings, regex, or functions")
@@ -28,10 +28,10 @@ def _parse_exceptions(input):
     return tuple(exceptions), matches
 
 
-def _retryable(e, matches):
+def _retryable(e, matches, count):
     for e_type, test in matches:
         if isinstance(e, e_type):
-            return test(e.message)
+            return test(e.message, count)
     return False
 
 
@@ -40,12 +40,9 @@ def _retry(func, exceptions, times, wait):
     previous_exception = None
     for n in xrange(times):
         try:
-            return func(
-                count=n,
-                previous_exception=previous_exception
-            )
+            return func()
         except exceptions as e:
-            if not _retryable(e, matches):
+            if not _retryable(e, matches, n):
                 raise e
             previous_exception = e
         time.sleep(wait)
@@ -91,8 +88,6 @@ def _function(
 
     if times < 1:
         raise TypeError("Cannot try less than 1 time")
-    elif times == 1:
-        return func(*args, **kwargs)
 
     return _retry(
         partial(func, *args, **kwargs),
