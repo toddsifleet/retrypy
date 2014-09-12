@@ -35,7 +35,8 @@ def _function(
     times=5,
     wait=0,
 ):
-    ''' A wrapper to automagically retry a function call if it fails
+    ''' A wrapper to automatically retry a function call if it raises an
+        exception
 
         :param func func: The function you want to call.
         :param list args: Positional args to be passed to func
@@ -46,15 +47,10 @@ def _function(
         :param int times: number of times to retry
         :param int wait: number of seconds to wait between tries
     '''
-    if args is None:
-        args = []
-    if kwargs is None:
-        kwargs = {}
-    if exceptions is None:
-        exceptions = [Exception]
-    if times < 1:
-        raise TypeError("Cannot try less than 1 time")
 
+    args = [] if args is None else args
+    kwargs = {} if kwargs is None else kwargs
+    exceptions = [Exception] if exceptions is None else exceptions
     return _retry(
         partial(func, *args, **kwargs),
         exceptions,
@@ -64,8 +60,13 @@ def _function(
     )
 
 
-def _decorator(*exceptions, **decorator_kwargs):
-    """Decorates a function to automatically retry it when it is called"""
+def _decorator(*exceptions, **kwargs):
+    """ Decorates a function to automatically retry it when it is called
+
+        :param type exception: A variable number of exception types that should
+            be retried.
+        :param dict kwargs:  kwargs that should be passed on to _function
+    """
 
     def wrap(func):
         @wraps(func)
@@ -75,7 +76,7 @@ def _decorator(*exceptions, **decorator_kwargs):
                 args=func_args,
                 kwargs=func_kwargs,
                 exceptions=exceptions or None,
-                **decorator_kwargs
+                **kwargs
             )
 
         return wrapped
