@@ -11,7 +11,7 @@ How to use it
         print "dummy_func called..."
         raise Exception("House")
     retry.retry(dummy_func)
-    
+
     dummy_func called...
     dummy_func called...
     dummy_func called...
@@ -27,7 +27,7 @@ How to use it
     Exception: House
 
     #or decorate a function.  this behaves the same as above
-    @retry.retry_me()
+    @retry_me()
     def dummy_func():
         print "dummy_func called..."
         raise Exception("House")
@@ -35,19 +35,14 @@ How to use it
 
 Params:
 -------
-    func[required]: The function you want to call.  
-    args: Positional args to be passed to func
-    kwargs: keywords args to be passed to func
-    exceptions [default: [Exception]]: an array of Exception types you want to retry on. this can be in the form of
-        [ExceptionType1, ExceptionType2 ... ]
-        [(ExceptionType1, RegEx) ...] => test if the error matches the RegEx
-        [(ExceptionType1, String) ...] => test if the error includes String
-        [(ExceptionType1, Function) ...] => A custom test function that returns true or false
-    times [default:5]: number of times to retry
-    wait [default: 1]: number of seconds to wait between tries
-    include_error_and_count [default: False]: If this is set the func must accept atleast two args in addition to the ones supplied:
-        1.) count => The attempt number
-        2.) previous_exception => the previous exception raised
+      func: The function you want to call.
+      args: Positional args to be passed to func
+      kwargs: keywords args to be passed to func
+      exceptions: an array of Exception types you want to retry on.
+      check_for_retry: A function that excepts Exception and Count and
+      returns true if the function should be retried.
+      times: number of times to retry
+      wait: number of seconds to wait between tries
 
 
 License:

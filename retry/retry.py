@@ -2,13 +2,13 @@ import time
 from functools import partial, wraps
 
 
-def _retry(func, exceptions, should_retry, times, wait):
+def _retry(func, exceptions, check_for_retry, times, wait):
     previous_exception = None
     for n in xrange(times):
         try:
             return func()
         except tuple(exceptions) as e:
-            if should_retry and not should_retry(e, n):
+            if check_for_retry and not check_for_retry(e, n):
                 raise e
             previous_exception = e
         time.sleep(wait)
@@ -16,6 +16,11 @@ def _retry(func, exceptions, should_retry, times, wait):
 
 
 def retry(*args, **kwargs):
+    """Wrapper around _function and _decorator
+
+    If there are no arguments or the first argument is a type this behaves
+    as a decorator, otherwise this will retry the function supplied.
+    """
     if not args or isinstance(args[0], type):
         return _decorator(*args, **kwargs)
     return _function(*args, **kwargs)
@@ -26,22 +31,20 @@ def _function(
     args=None,
     kwargs=None,
     exceptions=None,
-    should_retry=None,
+    check_for_retry=None,
     times=5,
     wait=0,
 ):
-    '''
-        A wrapper to automagically retry a function call if it fails
+    ''' A wrapper to automagically retry a function call if it fails
 
-        Parameters:
-            func: The function you want to call.
-            args: Positional args to be passed to func
-            kwargs: keywords args to be passed to func
-            exceptions: an array of Exception types you want to retry on.
-            should_retry: A function that excepts Exception and Count and
-            returns true if the function should be retried.
-            times: number of times to retry
-            wait: number of seconds to wait between tries
+        :param func func: The function you want to call.
+        :param list args: Positional args to be passed to func
+        :param dict kwargs: keywords args to be passed to func
+        :param list exceptions: an array of Exception types you to retry on
+        :param func check_for_retry: A function that excepts Exception and
+            Count and returns true if the function should be retried
+        :param int times: number of times to retry
+        :param int wait: number of seconds to wait between tries
     '''
     if args is None:
         args = []
@@ -55,13 +58,14 @@ def _function(
     return _retry(
         partial(func, *args, **kwargs),
         exceptions,
-        should_retry,
+        check_for_retry,
         times,
         wait,
     )
 
 
 def _decorator(*exceptions, **decorator_kwargs):
+    """Decorates a function to automatically retry it when it is called"""
 
     def wrap(func):
         @wraps(func)
