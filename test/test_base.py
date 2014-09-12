@@ -19,14 +19,32 @@ def test_func_with_no_args():
 
 
 def test_retry_func_with_no_args():
-    result = retry.retry(get_dummy_func(), wait=0)
+    result = retry.retry(get_dummy_func())
     assert result == (4, (), {})
 
 
 def test_func_that_raises_too_many_time_raises():
     with raises(Exception) as e:
-        retry.retry(get_dummy_func(50), wait=0)
+        retry.retry(get_dummy_func(50))
     assert e.value.message == 'Test Error 5'
+
+
+def test_func_that_fails_should_retry_raises():
+    with raises(Exception) as e:
+        retry.retry(
+            get_dummy_func(5),
+            should_retry=lambda e, c: not e.message.endswith('3'),
+        )
+    assert e.value.message == 'Test Error 3'
+
+
+def test_func_that_raises_wrong_exception_type_should_raise():
+    with raises(Exception) as e:
+        retry.retry(
+            get_dummy_func(5),
+            exceptions=[TypeError],
+        )
+    assert e.value.message == 'Test Error 1'
 
 
 def test_func_with_positional_arg():
@@ -34,7 +52,7 @@ def test_func_with_positional_arg():
 
 
 def test_retry_func_with_postional_arg():
-    result = retry.retry(get_dummy_func(), args=['foo'], wait=0)
+    result = retry.retry(get_dummy_func(), args=['foo'])
     assert result == (4, ('foo',), {})
 
 
@@ -44,14 +62,14 @@ def test_func_with_kwargs():
 
 
 def test_retry_func_with_kwarg():
-    result = retry.retry(get_dummy_func(), kwargs={'foo': 'bar'}, wait=0)
+    result = retry.retry(get_dummy_func(), kwargs={'foo': 'bar'})
     assert result == (4, (), {'foo': 'bar'})
 
 
 def test_decorated_func_with_no_args():
     func = get_dummy_func(0)
 
-    @retry.retry(wait=0)
+    @retry.retry()
     def foo():
         return func()
 
@@ -61,7 +79,7 @@ def test_decorated_func_with_no_args():
 def test_retry_decorated_func_with_no_args():
     func = get_dummy_func()
 
-    @retry.retry(wait=0)
+    @retry.retry()
     def foo():
         return func()
 
@@ -71,7 +89,7 @@ def test_retry_decorated_func_with_no_args():
 def test_decorated_func_with_positional_arg():
     func = get_dummy_func(0)
 
-    @retry.retry(wait=0)
+    @retry.retry()
     def foo(arg):
         return func(arg)
 
@@ -81,7 +99,7 @@ def test_decorated_func_with_positional_arg():
 def test_retry_decorated_func_with_positional_arg():
     func = get_dummy_func()
 
-    @retry.retry(wait=0)
+    @retry.retry()
     def foo(arg):
         return func(arg)
 
@@ -91,7 +109,7 @@ def test_retry_decorated_func_with_positional_arg():
 def test_decorated_func_with_kwargs():
     func = get_dummy_func(0)
 
-    @retry.retry(wait=0)
+    @retry.retry()
     def foo(**kwargs):
         return func(**kwargs)
 
@@ -101,7 +119,7 @@ def test_decorated_func_with_kwargs():
 def test_retry_decorated_func_with_kwargs():
     func = get_dummy_func()
 
-    @retry.retry(wait=0)
+    @retry.retry()
     def foo(**kwargs):
         return func(**kwargs)
 
@@ -111,10 +129,22 @@ def test_retry_decorated_func_with_kwargs():
 def test_decorated_func_that_raises_too_many_time_raises():
     func = get_dummy_func(50)
 
-    @retry.retry(wait=0)
+    @retry.retry()
     def foo():
         return func()
 
     with raises(Exception) as e:
-        retry.retry(get_dummy_func(50), wait=0)
+        foo()
     assert e.value.message == 'Test Error 5'
+
+
+def test_decorated_func_that_raises_wrong_exception_type_should_raise():
+    func = get_dummy_func(50)
+
+    @retry.retry(TypeError)
+    def foo():
+        return func()
+
+    with raises(Exception) as e:
+        foo()
+    assert e.value.message == 'Test Error 1'
