@@ -1,2 +1,3 @@
 flake8==2.1.0
 pytest==2.5.2
+doubles==0.0.1.beta3

@@ -1,4 +1,5 @@
 from pytest import raises
+from doubles import expect
 
 from retry import retry
 
@@ -8,7 +9,7 @@ def get_dummy_func(raise_count=4):
 
     def func(*args, **kwargs):
         calls.append(True)
-        if len(calls) < raise_count:
+        if len(calls) <= raise_count:
             raise Exception('Test Error {count}'.format(count=len(calls)))
         return len(calls), args, kwargs
     return func
@@ -20,7 +21,7 @@ def test_func_with_no_args():
 
 def test_retry_func_with_no_args():
     result = retry.retry(get_dummy_func())
-    assert result == (4, (), {})
+    assert result == (5, (), {})
 
 
 def test_func_that_raises_too_many_time_raises():
@@ -53,7 +54,7 @@ def test_func_with_positional_arg():
 
 def test_retry_func_with_postional_arg():
     result = retry.retry(get_dummy_func(), args=['foo'])
-    assert result == (4, ('foo',), {})
+    assert result == (5, ('foo',), {})
 
 
 def test_func_with_kwargs():
@@ -63,7 +64,7 @@ def test_func_with_kwargs():
 
 def test_retry_func_with_kwarg():
     result = retry.retry(get_dummy_func(), kwargs={'foo': 'bar'})
-    assert result == (4, (), {'foo': 'bar'})
+    assert result == (5, (), {'foo': 'bar'})
 
 
 def test_decorated_func_with_no_args():
@@ -83,7 +84,7 @@ def test_retry_decorated_func_with_no_args():
     def foo():
         return func()
 
-    assert foo() == (4, (), {})
+    assert foo() == (5, (), {})
 
 
 def test_decorated_func_with_positional_arg():
@@ -103,7 +104,7 @@ def test_retry_decorated_func_with_positional_arg():
     def foo(arg):
         return func(arg)
 
-    assert foo('arg') == (4, ('arg',), {})
+    assert foo('arg') == (5, ('arg',), {})
 
 
 def test_decorated_func_with_kwargs():
@@ -123,7 +124,7 @@ def test_retry_decorated_func_with_kwargs():
     def foo(**kwargs):
         return func(**kwargs)
 
-    assert foo(foo='bar') == (4, (), {'foo': 'bar'})
+    assert foo(foo='bar') == (5, (), {'foo': 'bar'})
 
 
 def test_decorated_func_that_raises_too_many_time_raises():
@@ -148,3 +149,36 @@ def test_decorated_func_that_raises_wrong_exception_type_should_raise():
     with raises(Exception) as e:
         foo()
     assert e.value.message == 'Test Error 1'
+
+
+def test_retry_with_custom_wait_function():
+    expect(retry)._sleep.with_args(0)
+    expect(retry)._sleep.with_args(1)
+    expect(retry)._sleep.with_args(2)
+    expect(retry)._sleep.with_args(3)
+
+    retry.retry(get_dummy_func(), wait=lambda n: n)
+
+
+def test_retry_with_fixed_wait():
+    expect(retry)._sleep.with_args(1).exactly(4).times
+
+    retry.retry(get_dummy_func(), wait=1)
+
+
+def test_retry_with_doubling_delay():
+    expect(retry)._sleep.with_args(1)
+    expect(retry)._sleep.with_args(2)
+    expect(retry)._sleep.with_args(4)
+    expect(retry)._sleep.with_args(8)
+
+    retry.retry(get_dummy_func(), wait=retry.doubling_delay(1))
+
+
+def test_retry_with_linear_delay():
+    expect(retry)._sleep.with_args(2)
+    expect(retry)._sleep.with_args(3)
+    expect(retry)._sleep.with_args(4)
+    expect(retry)._sleep.with_args(5)
+
+    retry.retry(get_dummy_func(), wait=retry.linear_delay(2, 1))

@@ -1,17 +1,51 @@
 import time
 from functools import partial, wraps
+from numbers import Number
+from random import random
+
+
+def random_delay(min_seconds=0, max_seconds=5):
+    def func(count):
+        return random(min_seconds, max_seconds)
+
+    return func
+
+
+def doubling_delay(start_at):
+    def func(count):
+        return start_at * (2**count)
+
+    return func
+
+
+def linear_delay(start_at, step=1):
+    def func(count):
+        return start_at + count*step
+
+    return func
+
+
+def _sleep(n):
+    time.sleep(n)
+
+
+def _wait(wait, count):
+    if not isinstance(wait, Number):
+        wait = wait(count - 1)
+
+    _sleep(wait)
 
 
 def _retry(func, exceptions, check_for_retry, times, wait):
     previous_exception = None
-    for n in xrange(times):
+    for n in xrange(1, times + 1):
         try:
             return func()
         except tuple(exceptions) as e:
             if check_for_retry and not check_for_retry(e, n):
                 raise e
             previous_exception = e
-        time.sleep(wait)
+        _wait(wait, n)
     raise previous_exception
 
 
