@@ -70,7 +70,7 @@ def test_retry_func_with_kwarg():
 def test_decorated_func_with_no_args():
     func = get_dummy_func(0)
 
-    @retry.retry()
+    @retry.decorate()
     def foo():
         return func()
 
@@ -80,7 +80,7 @@ def test_decorated_func_with_no_args():
 def test_retry_decorated_func_with_no_args():
     func = get_dummy_func()
 
-    @retry.retry()
+    @retry.decorate()
     def foo():
         return func()
 
@@ -90,7 +90,7 @@ def test_retry_decorated_func_with_no_args():
 def test_decorated_func_with_positional_arg():
     func = get_dummy_func(0)
 
-    @retry.retry()
+    @retry.decorate()
     def foo(arg):
         return func(arg)
 
@@ -100,7 +100,7 @@ def test_decorated_func_with_positional_arg():
 def test_retry_decorated_func_with_positional_arg():
     func = get_dummy_func()
 
-    @retry.retry()
+    @retry.decorate()
     def foo(arg):
         return func(arg)
 
@@ -110,7 +110,7 @@ def test_retry_decorated_func_with_positional_arg():
 def test_decorated_func_with_kwargs():
     func = get_dummy_func(0)
 
-    @retry.retry()
+    @retry.decorate()
     def foo(**kwargs):
         return func(**kwargs)
 
@@ -120,17 +120,25 @@ def test_decorated_func_with_kwargs():
 def test_retry_decorated_func_with_kwargs():
     func = get_dummy_func()
 
-    @retry.retry()
+    @retry.decorate()
     def foo(**kwargs):
         return func(**kwargs)
 
     assert foo(foo='bar') == (5, (), {'foo': 'bar'})
 
 
+def test_retry_wrapped_func_with_kwargs():
+    func = get_dummy_func()
+
+    func = retry.wrap(get_dummy_func())
+
+    assert func(foo='bar') == (5, (), {'foo': 'bar'})
+
+
 def test_decorated_func_that_raises_too_many_time_raises():
     func = get_dummy_func(50)
 
-    @retry.retry()
+    @retry.decorate()
     def foo():
         return func()
 
@@ -142,7 +150,7 @@ def test_decorated_func_that_raises_too_many_time_raises():
 def test_decorated_func_that_raises_wrong_exception_type_should_raise():
     func = get_dummy_func(50)
 
-    @retry.retry(TypeError)
+    @retry.decorate(TypeError)
     def foo():
         return func()
 

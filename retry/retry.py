@@ -49,18 +49,7 @@ def _retry(func, exceptions, check_for_retry, times, wait):
     raise previous_exception
 
 
-def retry(*args, **kwargs):
-    """Wrapper around _function and _decorator
-
-    If there are no arguments or the first argument is a type this behaves
-    as a decorator, otherwise this will retry the function supplied.
-    """
-    if not args or isinstance(args[0], type):
-        return _decorator(*args, **kwargs)
-    return _function(*args, **kwargs)
-
-
-def _function(
+def retry(
     func,
     args=None,
     kwargs=None,
@@ -94,7 +83,7 @@ def _function(
     )
 
 
-def _decorator(*exceptions, **kwargs):
+def decorate(*exceptions, **retry_args):
     """ Decorates a function to automatically retry it when it is called
 
         :param type exception: A variable number of exception types that should
@@ -102,16 +91,28 @@ def _decorator(*exceptions, **kwargs):
         :param dict kwargs:  kwargs that should be passed on to _function
     """
 
-    def wrap(func):
-        @wraps(func)
-        def wrapped(*func_args, **func_kwargs):
-            return retry(
-                func,
-                args=func_args,
-                kwargs=func_kwargs,
-                exceptions=exceptions or None,
-                **kwargs
-            )
+    def inner(func):
+        return wrap(
+            func,
+            exceptions=exceptions or None,
+            **retry_args
+        )
 
-        return wrapped
-    return wrap
+    return inner
+
+
+def wrap(func, **retry_args):
+    """ Wraps a function to automatically retry it when it is called
+
+        Accepts the same arguments as ``retry``.
+    """
+
+    @wraps(func)
+    def inner(*args, **kwargs):
+        return retry(
+            func,
+            args=args,
+            kwargs=kwargs,
+            **retry_args
+        )
+    return inner
