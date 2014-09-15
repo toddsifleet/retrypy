@@ -49,7 +49,7 @@ def _retry(func, exceptions, check_for_retry, times, wait):
     raise previous_exception
 
 
-def retry(
+def call(
     func,
     args=None,
     kwargs=None,
@@ -109,7 +109,7 @@ def wrap(func, **retry_args):
 
     @wraps(func)
     def inner(*args, **kwargs):
-        return retry(
+        return call(
             func,
             args=args,
             kwargs=kwargs,

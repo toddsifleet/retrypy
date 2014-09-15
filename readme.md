@@ -11,7 +11,7 @@ Using retry as a function:
         print "dummy_func called..."
         raise Exception("House")
 
-    retry.retry(
+    retry.call(
       dummy_func,
       times=2
     )
@@ -34,7 +34,7 @@ Params:
 
 Or you can use it as a decorator:
 -------
-    @retry(Exception, times=2)
+    @retry.decorate(Exception, times=2)
     def dummy_func():
         print "dummy_func called..."
         raise Exception("House")
@@ -53,6 +53,27 @@ Params:
           returns true if the function should be retried.
       times: number of times to retry
       wait: number of seconds to wait between tries
+
+Or you can use it to wrap a function and return a new callable
+-------
+    def dummy_func():
+        print "dummy_func called..."
+        raise Exception("House")
+
+    func = retry.wrap(
+      dummy_func(),
+      times=2
+    )
+    func()
+
+    dummy_func called...
+    dummy_func called...
+    Exception: House
+
+Params:
+    See Docs for retry.call
+
+
 License:
 -------
 

@@ -16,23 +16,23 @@ def get_dummy_func(raise_count=4):
 
 
 def test_func_with_no_args():
-    assert retry.retry(get_dummy_func(0)) == (1, (), {})
+    assert retry.call(get_dummy_func(0)) == (1, (), {})
 
 
 def test_retry_func_with_no_args():
-    result = retry.retry(get_dummy_func())
+    result = retry.call(get_dummy_func())
     assert result == (5, (), {})
 
 
 def test_func_that_raises_too_many_time_raises():
     with raises(Exception) as e:
-        retry.retry(get_dummy_func(50))
+        retry.call(get_dummy_func(50))
     assert e.value.message == 'Test Error 5'
 
 
 def test_func_that_fails_check_for_retry_raises():
     with raises(Exception) as e:
-        retry.retry(
+        retry.call(
             get_dummy_func(5),
             check_for_retry=lambda e, c: not e.message.endswith('3'),
         )
@@ -41,7 +41,7 @@ def test_func_that_fails_check_for_retry_raises():
 
 def test_func_that_raises_wrong_exception_type_should_raise():
     with raises(Exception) as e:
-        retry.retry(
+        retry.call(
             get_dummy_func(5),
             exceptions=[TypeError],
         )
@@ -49,21 +49,21 @@ def test_func_that_raises_wrong_exception_type_should_raise():
 
 
 def test_func_with_positional_arg():
-    assert retry.retry(lambda x: x, args=['bar']) == 'bar'
+    assert retry.call(lambda x: x, args=['bar']) == 'bar'
 
 
 def test_retry_func_with_postional_arg():
-    result = retry.retry(get_dummy_func(), args=['foo'])
+    result = retry.call(get_dummy_func(), args=['foo'])
     assert result == (5, ('foo',), {})
 
 
 def test_func_with_kwargs():
-    result = retry.retry(get_dummy_func(0), kwargs={'foo': 'bar'})
+    result = retry.call(get_dummy_func(0), kwargs={'foo': 'bar'})
     assert result == (1, (), {'foo': 'bar'})
 
 
 def test_retry_func_with_kwarg():
-    result = retry.retry(get_dummy_func(), kwargs={'foo': 'bar'})
+    result = retry.call(get_dummy_func(), kwargs={'foo': 'bar'})
     assert result == (5, (), {'foo': 'bar'})
 
 
@@ -165,13 +165,13 @@ def test_retry_with_custom_wait_function():
     expect(retry)._sleep.with_args(2)
     expect(retry)._sleep.with_args(3)
 
-    retry.retry(get_dummy_func(), wait=lambda n: n)
+    retry.call(get_dummy_func(), wait=lambda n: n)
 
 
 def test_retry_with_fixed_wait():
     expect(retry)._sleep.with_args(1).exactly(4).times
 
-    retry.retry(get_dummy_func(), wait=1)
+    retry.call(get_dummy_func(), wait=1)
 
 
 def test_retry_with_doubling_delay():
@@ -180,7 +180,7 @@ def test_retry_with_doubling_delay():
     expect(retry)._sleep.with_args(4)
     expect(retry)._sleep.with_args(8)
 
-    retry.retry(get_dummy_func(), wait=retry.doubling_delay(1))
+    retry.call(get_dummy_func(), wait=retry.doubling_delay(1))
 
 
 def test_retry_with_linear_delay():
@@ -189,4 +189,4 @@ def test_retry_with_linear_delay():
     expect(retry)._sleep.with_args(4)
     expect(retry)._sleep.with_args(5)
 
-    retry.retry(get_dummy_func(), wait=retry.linear_delay(2, 1))
+    retry.call(get_dummy_func(), wait=retry.linear_delay(2, 1))
