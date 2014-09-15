@@ -1,7 +1,5 @@
-lannguage: python
+language: python
 
 install: make bootstrap
 
 script: make
-
-sudo: false
