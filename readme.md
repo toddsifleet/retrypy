@@ -1,7 +1,7 @@
 A python retry wrapper/decorator
 =============
 
-![Travis Test Status](https://travis-ci.org/toddsifleet/retry.svg?branch=master)
+[![Travis Test Status](https://travis-ci.org/toddsifleet/retry.svg?branch=master)](https://travis-ci.org/toddsifleet/retry)
 
 A simple way to auto retry a funciton that has the possibility of raising an error.  You can either call retry directly or decorate a function to get it to retry.  Intelligent matching logic allows you to retry certain exception while raising other exceptions.
 
