@@ -3,3 +3,5 @@ lannguage: python
 install: make bootstrap
 
 script: make
+
+sudo: false
