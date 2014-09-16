@@ -4,7 +4,7 @@ test: clean lint
 
 .PHONY: lint
 lint:
-	@flake8 retry test
+	@flake8 retrypy test
 
 .PHONY: clean
 clean:

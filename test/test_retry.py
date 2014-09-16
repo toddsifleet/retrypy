@@ -1,7 +1,7 @@
 from pytest import raises
 import mock
 
-from retry import retry
+from retrypy import retry
 
 
 def get_dummy_func(raise_count=4):
@@ -159,7 +159,7 @@ def test_decorated_func_that_raises_wrong_exception_type_should_raise():
     assert str(e.value) == 'Test Error 1'
 
 
-@mock.patch('retry.retry.sleep')
+@mock.patch('retrypy.retry.sleep')
 def test_retry_with_wait_function(mock_sleep):
     retry.call(get_dummy_func(), wait=lambda n: n)
     mock_sleep.assert_called_with(3)

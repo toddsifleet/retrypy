@@ -1,6 +1,6 @@
 import re
 
-from retry import check
+from retrypy import check
 
 
 def test_message_equals_returns_true():
