@@ -2,6 +2,10 @@ import time
 from functools import partial, wraps
 from numbers import Number
 
+try:
+    xrange
+except NameError:
+    xrange = range
 
 def _sleep(n):
     time.sleep(n)
