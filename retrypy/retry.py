@@ -47,7 +47,7 @@ def call(
         :param list exceptions: an array of Exception types you to retry on
         :param func check: A function that excepts Exception and
             Count and returns true if the function should be retried
-        :param int times: number of times to retry
+        :param int times: number of times to try the function
         :param int wait: number of seconds to wait between tries
     '''
 
@@ -69,6 +69,7 @@ def decorate(*exceptions, **retry_args):
         :param type exception: A variable number of exception types that should
             be retried.
         :param dict kwargs:  kwargs that should be passed on to ``call``
+            see retrypy.call for details.
     """
 
     def inner(func):
