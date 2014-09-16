@@ -27,7 +27,7 @@ def test_retry_func_with_no_args():
 def test_func_that_raises_too_many_time_raises():
     with raises(Exception) as e:
         retry.call(get_dummy_func(50))
-    assert e.value.message == 'Test Error 5'
+    assert str(e.value) == 'Test Error 5'
 
 
 def test_func_that_fails_check_for_retry_raises():
@@ -36,7 +36,7 @@ def test_func_that_fails_check_for_retry_raises():
             get_dummy_func(5),
             check_for_retry=lambda e, c: not e.message.endswith('3'),
         )
-    assert e.value.message == 'Test Error 3'
+    assert str(e.value) == 'Test Error 3'
 
 
 def test_func_that_raises_wrong_exception_type_should_raise():
@@ -45,7 +45,7 @@ def test_func_that_raises_wrong_exception_type_should_raise():
             get_dummy_func(5),
             exceptions=[TypeError],
         )
-    assert e.value.message == 'Test Error 1'
+    assert str(e.value) == 'Test Error 1'
 
 
 def test_func_with_positional_arg():
@@ -144,7 +144,7 @@ def test_decorated_func_that_raises_too_many_time_raises():
 
     with raises(Exception) as e:
         foo()
-    assert e.value.message == 'Test Error 5'
+    assert str(e.value) == 'Test Error 5'
 
 
 def test_decorated_func_that_raises_wrong_exception_type_should_raise():
@@ -156,7 +156,7 @@ def test_decorated_func_that_raises_wrong_exception_type_should_raise():
 
     with raises(Exception) as e:
         foo()
-    assert e.value.message == 'Test Error 1'
+    assert str(e.value) == 'Test Error 1'
 
 
 @mock.patch('retry.retry._sleep')
