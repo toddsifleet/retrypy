@@ -30,7 +30,7 @@ Params:
       exceptions: an array of Exception types you want to retry on.
       check: A function that excepts Exception and Count and
           returns true if the function should be retried.
-      times: number of times to retry
+      times: number of times to try the function
       wait: number of seconds to wait between tries
 
 
@@ -53,7 +53,7 @@ Params:
           are the only types of exceptions we will retry.
       check: A function that excepts Exception and Count and
           returns true if the function should be retried.
-      times: number of times to retry
+      times: number of times to try the function
       wait: number of seconds to wait between tries
 
 Or you can use it to wrap a function and return a new callable
