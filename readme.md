@@ -63,7 +63,7 @@ Or you can use it to wrap a function and return a new callable
         raise Exception("House")
 
     func = retry.wrap(
-      dummy_func(),
+      dummy_func,
       times=2
     )
     func()
