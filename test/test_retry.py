@@ -159,7 +159,7 @@ def test_decorated_func_that_raises_wrong_exception_type_should_raise():
     assert str(e.value) == 'Test Error 1'
 
 
-@mock.patch('retry.retry._sleep')
+@mock.patch('retry.retry.sleep')
 def test_retry_with_wait_function(mock_sleep):
     retry.call(get_dummy_func(), wait=lambda n: n)
     mock_sleep.assert_called_with(3)

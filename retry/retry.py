@@ -1,4 +1,4 @@
-import time
+from time import sleep
 from functools import partial, wraps
 from numbers import Number
 
@@ -9,15 +9,11 @@ except NameError:
     xrange = range
 
 
-def _sleep(n):
-    time.sleep(n)
-
-
 def _wait(wait, count):
     if not isinstance(wait, Number):
         wait = wait(count - 1)
 
-    _sleep(wait)
+    sleep(wait)
 
 
 def _retry(func, exceptions, check_for_retry, times, wait):
