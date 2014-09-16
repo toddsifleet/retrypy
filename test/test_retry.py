@@ -30,11 +30,11 @@ def test_func_that_raises_too_many_time_raises():
     assert str(e.value) == 'Test Error 5'
 
 
-def test_func_that_fails_check_for_retry_raises():
+def test_func_that_fails_check_raises():
     with raises(Exception) as e:
         retry.call(
             get_dummy_func(5),
-            check_for_retry=lambda e, c: not str(e).endswith('3'),
+            check=lambda e, c: not str(e).endswith('3'),
         )
     assert str(e.value) == 'Test Error 3'
 

@@ -28,7 +28,7 @@ Params:
       args: Positional args to be passed to func
       kwargs: keywords args to be passed to func
       exceptions: an array of Exception types you want to retry on.
-      check_for_retry: A function that excepts Exception and Count and
+      check: A function that excepts Exception and Count and
           returns true if the function should be retried.
       times: number of times to retry
       wait: number of seconds to wait between tries
@@ -51,7 +51,7 @@ Params:
 -------
       positional_args: All position arguments must be Exception types, these
           are the only types of exceptions we will retry.
-      check_for_retry: A function that excepts Exception and Count and
+      check: A function that excepts Exception and Count and
           returns true if the function should be retried.
       times: number of times to retry
       wait: number of seconds to wait between tries

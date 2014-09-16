@@ -16,13 +16,13 @@ def _wait(wait, count):
     sleep(wait)
 
 
-def _retry(func, exceptions, check_for_retry, times, wait):
+def _retry(func, exceptions, check, times, wait):
     previous_exception = None
     for n in xrange(1, times + 1):
         try:
             return func()
         except tuple(exceptions) as e:
-            if check_for_retry and not check_for_retry(e, n):
+            if check and not check(e, n):
                 raise e
             previous_exception = e
         _wait(wait, n)
@@ -34,7 +34,7 @@ def call(
     args=None,
     kwargs=None,
     exceptions=None,
-    check_for_retry=None,
+    check=None,
     times=5,
     wait=0,
 ):
@@ -45,7 +45,7 @@ def call(
         :param list args: Positional args to be passed to func
         :param dict kwargs: keywords args to be passed to func
         :param list exceptions: an array of Exception types you to retry on
-        :param func check_for_retry: A function that excepts Exception and
+        :param func check: A function that excepts Exception and
             Count and returns true if the function should be retried
         :param int times: number of times to retry
         :param int wait: number of seconds to wait between tries
@@ -57,7 +57,7 @@ def call(
     return _retry(
         partial(func, *args, **kwargs),
         exceptions,
-        check_for_retry,
+        check,
         times,
         wait,
     )
@@ -68,7 +68,7 @@ def decorate(*exceptions, **retry_args):
 
         :param type exception: A variable number of exception types that should
             be retried.
-        :param dict kwargs:  kwargs that should be passed on to _function
+        :param dict kwargs:  kwargs that should be passed on to ``call``
     """
 
     def inner(func):
@@ -84,7 +84,7 @@ def decorate(*exceptions, **retry_args):
 def wrap(func, **retry_args):
     """ Wraps a function to automatically retry it when it is called
 
-        Accepts the same arguments as ``retry``.
+        Accepts the same arguments as ``call``.
     """
 
     @wraps(func)
