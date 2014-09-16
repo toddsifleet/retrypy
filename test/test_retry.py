@@ -1,5 +1,5 @@
 from pytest import raises
-from doubles import expect
+import mock
 
 from retry import retry
 
@@ -159,34 +159,7 @@ def test_decorated_func_that_raises_wrong_exception_type_should_raise():
     assert e.value.message == 'Test Error 1'
 
 
-def test_retry_with_custom_wait_function():
-    expect(retry)._sleep.with_args(0)
-    expect(retry)._sleep.with_args(1)
-    expect(retry)._sleep.with_args(2)
-    expect(retry)._sleep.with_args(3)
-
+@mock.patch('retry.retry._sleep')
+def test_retry_with_wait_function(mock_sleep):
     retry.call(get_dummy_func(), wait=lambda n: n)
-
-
-def test_retry_with_fixed_wait():
-    expect(retry)._sleep.with_args(1).exactly(4).times
-
-    retry.call(get_dummy_func(), wait=1)
-
-
-def test_retry_with_doubling_delay():
-    expect(retry)._sleep.with_args(1)
-    expect(retry)._sleep.with_args(2)
-    expect(retry)._sleep.with_args(4)
-    expect(retry)._sleep.with_args(8)
-
-    retry.call(get_dummy_func(), wait=retry.doubling_delay(1))
-
-
-def test_retry_with_linear_delay():
-    expect(retry)._sleep.with_args(2)
-    expect(retry)._sleep.with_args(3)
-    expect(retry)._sleep.with_args(4)
-    expect(retry)._sleep.with_args(5)
-
-    retry.call(get_dummy_func(), wait=retry.linear_delay(2, 1))
+    mock_sleep.assert_called_with(3)
