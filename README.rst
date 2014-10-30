@@ -100,5 +100,5 @@ See LICENSE
 .. |Travis Test Status| image:: https://travis-ci.org/toddsifleet/retrypy.svg?branch=master
    :target: https://travis-ci.org/toddsifleet/retrypy
 
-.. |PyPi Version| image:: https://travis-ci.org/toddsifleet/retrypy.svg?branch=master
+.. |PyPi Version| image:: https://badge.fury.io/py/retrypy.svg
    :target: http://badge.fury.io/py/retrypy
