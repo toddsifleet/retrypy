@@ -31,9 +31,9 @@ def _retry(func, exceptions, check, times, wait):
 
 def call(
     func,
+    exceptions=None,
     args=None,
     kwargs=None,
-    exceptions=None,
     check=None,
     times=5,
     wait=0,
@@ -54,7 +54,7 @@ def call(
 
     args = [] if args is None else args
     kwargs = {} if kwargs is None else kwargs
-    exceptions = [Exception] if exceptions is None else exceptions
+    exceptions = [Exception] if not exceptions else exceptions
     return _retry(
         partial(func, *args, **kwargs),
         exceptions,
@@ -78,7 +78,7 @@ def decorate(*exceptions, **retry_args):
     def inner(func):
         return wrap(
             func,
-            exceptions=exceptions or None,
+            exceptions=exceptions,
             **retry_args
         )
 
