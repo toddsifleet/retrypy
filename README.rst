@@ -1,6 +1,7 @@
 A python retry wrapper/decorator
 ================================
 
+|PyPi Version|
 |Travis Test Status|
 
 A simple way to auto retry a funciton that has the possibility of
@@ -98,3 +99,6 @@ See LICENSE
 
 .. |Travis Test Status| image:: https://travis-ci.org/toddsifleet/retrypy.svg?branch=master
    :target: https://travis-ci.org/toddsifleet/retrypy
+
+.. |PyPi Version| image:: https://travis-ci.org/toddsifleet/retrypy.svg?branch=master
+   :target: http://badge.fury.io/py/retrypy
