@@ -67,8 +67,8 @@ def call(
 def decorate(*exceptions, **retry_args):
     """ Decorates a function to automatically retry it when it is called
 
-        :param type exceptions: A variable number of exception types that should
-            be retried.
+        :param type exceptions: A variable number of exception types that
+            should be retried.
         :param dict kwargs:  kwargs that should be passed on to ``call``
             see retrypy.call for details.
         :returns: A wrapped function
