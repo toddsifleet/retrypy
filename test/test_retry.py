@@ -160,11 +160,41 @@ class TestDecorated(object):
 
         assert foo() == (CallCounter(5, 4), (), {})
 
-
-def TestWrap(object):
-    def test_retry_wrapped_func_with_kwargs(self):
+    @mock.patch('retrypy.retry.sleep')
+    def test_retry_with_wait_function(self, mock_sleep):
         func = get_dummy_func()
 
+        @retry.decorate(wait=lambda n: n)
+        def foo():
+            return func()
+        foo()
+        mock_sleep.assert_called_with(3)
+
+
+class TestWrap(object):
+    def test_retry_func_with_no_args(self):
+        func = retry.wrap(get_dummy_func())
+
+        assert func() == (CallCounter(5, 4), (), {})
+
+    def test_retry_func_with_args(self):
+        func = retry.wrap(get_dummy_func())
+
+        assert func('arg') == (CallCounter(5, 4), ('arg', ), {})
+
+    def test_retry_func_with_kwargs(self):
         func = retry.wrap(get_dummy_func())
 
         assert func(foo='bar') == (CallCounter(5, 4), (), {'foo': 'bar'})
+
+    @mock.patch('retrypy.retry.sleep')
+    def test_retry_with_wait_function(self, mock_sleep):
+        func = retry.wrap(get_dummy_func(), wait=lambda n: n)
+        func()
+        mock_sleep.assert_called_with(3)
+
+    def test_func_that_raises_too_many_time_raises(self):
+        func = retry.wrap(get_dummy_func(50))
+        with raises(Exception) as e:
+            func()
+        assert str(e.value) == 'Test Error 5'
