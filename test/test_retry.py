@@ -4,30 +4,49 @@ import mock
 from retrypy import retry
 
 
+class CallCounter(object):
+    def __init__(self, calls=0, errors=0):
+        self.calls = calls
+        self.errors = errors
+
+    def __eq__(self, other):
+        return other.calls == self.calls and other.errors == self.errors
+
+
 def get_dummy_func(raise_count=4):
-    calls = []
+    counter = CallCounter()
 
     def func(*args, **kwargs):
-        calls.append(True)
-        if len(calls) <= raise_count:
-            raise Exception('Test Error {count}'.format(count=len(calls)))
-        return len(calls), args, kwargs
+        counter.calls += 1
+        if counter.errors < raise_count:
+            counter.errors += 1
+            raise Exception('Test Error {count}'.format(count=counter.errors))
+        return counter, args, kwargs
     return func
 
 
 def test_func_with_no_args():
-    assert retry.call(get_dummy_func(0)) == (1, (), {})
+    result = retry.call(get_dummy_func(0))
+    assert result == (CallCounter(1, 0), (), {})
 
 
 def test_retry_func_with_no_args():
     result = retry.call(get_dummy_func())
-    assert result == (5, (), {})
+    assert result == (CallCounter(5, 4), (), {})
 
 
 def test_func_that_raises_too_many_time_raises():
     with raises(Exception) as e:
         retry.call(get_dummy_func(50))
     assert str(e.value) == 'Test Error 5'
+
+
+def test_func_that_passes_check_does_not_raise():
+    result = retry.call(
+        get_dummy_func(),
+        check=lambda e, c: True,
+    )
+    assert result == (CallCounter(5, 4), (), {})
 
 
 def test_func_that_fails_check_raises():
@@ -54,17 +73,17 @@ def test_func_with_positional_arg():
 
 def test_retry_func_with_postional_arg():
     result = retry.call(get_dummy_func(), args=['foo'])
-    assert result == (5, ('foo',), {})
+    assert result == (CallCounter(5, 4), ('foo',), {})
 
 
 def test_func_with_kwargs():
     result = retry.call(get_dummy_func(0), kwargs={'foo': 'bar'})
-    assert result == (1, (), {'foo': 'bar'})
+    assert result == (CallCounter(1), (), {'foo': 'bar'})
 
 
 def test_retry_func_with_kwarg():
     result = retry.call(get_dummy_func(), kwargs={'foo': 'bar'})
-    assert result == (5, (), {'foo': 'bar'})
+    assert result == (CallCounter(5, 4), (), {'foo': 'bar'})
 
 
 def test_decorated_func_with_no_args():
@@ -74,7 +93,7 @@ def test_decorated_func_with_no_args():
     def foo():
         return func()
 
-    assert foo() == (1, (), {})
+    assert foo() == (CallCounter(1, 0), (), {})
 
 
 def test_retry_decorated_func_with_no_args():
@@ -84,7 +103,7 @@ def test_retry_decorated_func_with_no_args():
     def foo():
         return func()
 
-    assert foo() == (5, (), {})
+    assert foo() == (CallCounter(5, 4), (), {})
 
 
 def test_decorated_func_with_positional_arg():
@@ -94,7 +113,7 @@ def test_decorated_func_with_positional_arg():
     def foo(arg):
         return func(arg)
 
-    assert foo('arg') == (1, ('arg',), {})
+    assert foo('arg') == (CallCounter(1, 0), ('arg',), {})
 
 
 def test_retry_decorated_func_with_positional_arg():
@@ -104,7 +123,7 @@ def test_retry_decorated_func_with_positional_arg():
     def foo(arg):
         return func(arg)
 
-    assert foo('arg') == (5, ('arg',), {})
+    assert foo('arg') == (CallCounter(5, 4), ('arg',), {})
 
 
 def test_decorated_func_with_kwargs():
@@ -114,7 +133,7 @@ def test_decorated_func_with_kwargs():
     def foo(**kwargs):
         return func(**kwargs)
 
-    assert foo(foo='bar') == (1, (), {'foo': 'bar'})
+    assert foo(foo='bar') == (CallCounter(1), (), {'foo': 'bar'})
 
 
 def test_retry_decorated_func_with_kwargs():
@@ -124,7 +143,7 @@ def test_retry_decorated_func_with_kwargs():
     def foo(**kwargs):
         return func(**kwargs)
 
-    assert foo(foo='bar') == (5, (), {'foo': 'bar'})
+    assert foo(foo='bar') == (CallCounter(5, 4), (), {'foo': 'bar'})
 
 
 def test_retry_wrapped_func_with_kwargs():
@@ -132,7 +151,7 @@ def test_retry_wrapped_func_with_kwargs():
 
     func = retry.wrap(get_dummy_func())
 
-    assert func(foo='bar') == (5, (), {'foo': 'bar'})
+    assert func(foo='bar') == (CallCounter(5, 4), (), {'foo': 'bar'})
 
 
 def test_decorated_func_that_raises_too_many_time_raises():
