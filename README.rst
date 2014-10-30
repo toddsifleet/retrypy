@@ -83,14 +83,23 @@ Wrap a function and retrun a new callable:
     dummy_func called...
     Exception: House
 
-Params: See Docs for retry.call
 
-Installation
-------------
+Installation:
+-------------
 
 ::
 
     >> pip install retrypy
+
+Development:
+------------
+
+::
+
+    >> git clone https://github.com/toddsifleet/retrypy
+    >> cd retrypy
+    >> make bootstrap
+    >> make
 
 License:
 --------
