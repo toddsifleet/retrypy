@@ -13,14 +13,27 @@ class CallCounter(object):
         return other.calls == self.calls and other.errors == self.errors
 
 
-def get_dummy_func(raise_count=4):
+def get_dummy_func(raise_count=4, exception_type=Exception):
+    """Return a function for testing
+
+    The returned function will raise an exception ``raise_count`` times when
+    it is retried.  After ``raise_count`` call it will return
+
+    :param int raise_count: Number of times to raise (default=4)
+    :param type exception_type: Type of exception to raise (default=Exception)
+    :returns: A function to be used in tests
+    :rtype: func
+    """
+
     counter = CallCounter()
 
     def func(*args, **kwargs):
         counter.calls += 1
         if counter.errors < raise_count:
             counter.errors += 1
-            raise Exception('Test Error {count}'.format(count=counter.errors))
+            raise exception_type(
+                'Test Error {count}'.format(count=counter.errors)
+            )
         return counter, args, kwargs
     return func
 
