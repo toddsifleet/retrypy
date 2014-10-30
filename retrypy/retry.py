@@ -49,6 +49,7 @@ def call(
             Count and returns true if the function should be retried
         :param int times: number of times to try the function
         :param int wait: number of seconds to wait between tries
+        :returns: The return value form the supplied function or raises.
     '''
 
     args = [] if args is None else args
@@ -70,6 +71,8 @@ def decorate(*exceptions, **retry_args):
             be retried.
         :param dict kwargs:  kwargs that should be passed on to ``call``
             see retrypy.call for details.
+        :returns: A wrapped function
+        :rtype: func
     """
 
     def inner(func):
@@ -86,6 +89,7 @@ def wrap(func, **retry_args):
     """ Wraps a function to automatically retry it when it is called
 
         Accepts the same arguments as ``call``.
+        :returns: The return value form the supplied function or raises.
     """
 
     @wraps(func)
