@@ -11,7 +11,7 @@ except NameError:
 
 def _wait(wait, count):
     if not isinstance(wait, Number):
-        wait = wait(count - 1)
+        wait = wait(count)
 
     sleep(wait)
 

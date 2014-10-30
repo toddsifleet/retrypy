@@ -8,7 +8,7 @@ def random(min_seconds=0, max_seconds=5):
     :param float max_seconds: Maximum delay in seconds
     :rtype func:
     """
-    def func(count):
+    def func(_):
         return _random(min_seconds, max_seconds)
 
     return func
@@ -21,6 +21,7 @@ def exponential(start_at):
     :rtype func:
     """
     def func(count):
+        count -= 1
         return start_at * (2**count)
 
     return func
@@ -34,6 +35,7 @@ def incremental(start_at, step=1):
     :rtype func:
     """
     def func(count):
+        count -= 1
         return start_at + count*step
 
     return func

@@ -50,7 +50,7 @@ class TestCall(object):
         with raises(Exception) as e:
             retry.call(
                 get_dummy_func(5),
-                check=lambda e, c: not str(e).endswith('3'),
+                check=lambda e, c: c != 3
             )
         assert str(e.value) == 'Test Error 3'
 
@@ -80,7 +80,7 @@ class TestCall(object):
     @mock.patch('retrypy.retry.sleep')
     def test_retry_with_wait_function(self, mock_sleep):
         retry.call(get_dummy_func(), wait=lambda n: n)
-        mock_sleep.assert_called_with(3)
+        mock_sleep.assert_called_with(4)
 
 
 class TestDecorated(object):
@@ -168,7 +168,7 @@ class TestDecorated(object):
         def foo():
             return func()
         foo()
-        mock_sleep.assert_called_with(3)
+        mock_sleep.assert_called_with(4)
 
 
 class TestWrap(object):
@@ -191,7 +191,7 @@ class TestWrap(object):
     def test_retry_with_wait_function(self, mock_sleep):
         func = retry.wrap(get_dummy_func(), wait=lambda n: n)
         func()
-        mock_sleep.assert_called_with(3)
+        mock_sleep.assert_called_with(4)
 
     def test_func_that_raises_too_many_time_raises(self):
         func = retry.wrap(get_dummy_func(50))

@@ -15,15 +15,15 @@ def test_random_calls_stdlib_random(mock_random):
 def test_exponential_grows_exponentialy():
     func = retrypy.delay.exponential(2)
 
-    assert func(0) == 2
-    assert func(1) == 4
-    assert func(2) == 8
-    assert func(3) == 16
+    assert func(1) == 2
+    assert func(2) == 4
+    assert func(3) == 8
+    assert func(4) == 16
 
 
 def test_incremental_grows_by_step():
     func = retrypy.delay.incremental(2, 3)
 
-    assert func(0) == 2
-    assert func(1) == 5
-    assert func(2) == 8
+    assert func(1) == 2
+    assert func(2) == 5
+    assert func(3) == 8
