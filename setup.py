@@ -8,6 +8,7 @@ with open('README.rst') as f:
 setup(
     description='Python retry utility',
     long_description=long_description,
+    install_requires=["six>=1.9.0"],
     name='retrypy',
     version=retrypy.__version__,
     author='Todd Siflet',

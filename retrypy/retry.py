@@ -3,6 +3,8 @@ import sys
 from functools import partial, wraps
 from numbers import Number
 
+import six
+
 
 try:
     xrange
@@ -24,10 +26,10 @@ def _retry(func, exceptions, check, times, wait):
         except tuple(exceptions) as e:
             exception_info = sys.exc_info()
             if check and not check(e, n):
-                raise exception_info[1], None, exception_info[2]
+                six.reraise(*exception_info)
         if n < times:
             _wait(wait, n)
-    raise exception_info[1], None, exception_info[2]
+    six.reraise(*exception_info)
 
 
 def call(

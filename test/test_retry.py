@@ -211,3 +211,11 @@ class TestWrap(object):
         with raises(Exception) as e:
             func()
         assert str(e.value) == 'Test Error 5'
+
+
+class TestTraceBack(object):
+    def test_traceback_is_correct(self):
+        func = retry.wrap(get_dummy_func(50))
+        with raises(Exception) as e:
+            func()
+        assert e.traceback[-1].name == 'func'
