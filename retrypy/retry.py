@@ -1,4 +1,5 @@
 from time import sleep
+import sys
 from functools import partial, wraps
 from numbers import Number
 
@@ -21,11 +22,12 @@ def _retry(func, exceptions, check, times, wait):
         try:
             return func()
         except tuple(exceptions) as e:
+            exception_info = sys.exc_info()
             if check and not check(e, n):
-                raise
+                raise exception_info[1], None, exception_info[2]
         if n < times:
             _wait(wait, n)
-    raise
+    raise exception_info[1], None, exception_info[2]
 
 
 def call(
