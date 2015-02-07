@@ -174,6 +174,35 @@ Output (wait times: 1s, 2s, 3s, 4s)::
         raise previous_exception
     Exception: House
 
+
+Builtin Exception Checkers:
+---------------------------
+
+Exception Checkers can be used to check if you want to retry a specific exception.  If the check function returns true then the exception is retryable otherwise we will not catch the exception and retry.  The available **checkers** are: ``message_equals``, ``message_contains``, and ``message_matches``.
+
+**message_equals**, will match any ``Exception`` with a message that is identical to the string provided.
+
+**message_contains**, will match any ``Exception`` with a message that contains the string provided.
+
+**message_matches**, will match any ``Exception`` with a message that matches the regex provided.  The regex may be passed as a string or a compiled regex pattern.
+
+
+Custom Exception Checkers:
+--------------------------
+
+You can write your own exception checkers, their only requirements are that they: take an ``Exception`` and an ``Integer`` as parameters.  They should return True if the exception is retryable otherwise False.
+
+::
+
+    def custom_matcher(e, call_count):
+        # never fail ther first time no matter what
+        if call_count == 1:
+            return True
+
+        # only retry errors with Bob Barker in the message.
+        return "Bob Barker" in str(e):
+
+
 Installation:
 -------------
 
