@@ -195,7 +195,7 @@ You can write your own exception checkers, their only requirements are that they
 ::
 
     def custom_matcher(e, call_count):
-        # never fail ther first time no matter what
+        # never fail their first time no matter what
         if call_count == 1:
             return True
 
