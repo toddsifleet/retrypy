@@ -25,7 +25,8 @@ def _retry(func, exceptions, check, times, wait):
             if check and not check(e, n):
                 raise e
             previous_exception = e
-        _wait(wait, n)
+        if n < times:
+            _wait(wait, n)
     raise previous_exception
 
 
