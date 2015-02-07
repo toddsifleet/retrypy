@@ -88,7 +88,7 @@ Delay Helpers:
 
 Functions to implement some common backoff strategies: random, exponential, and incremental.
 
-__Random__::
+**Random**::
 
     import time
     from retrypy import retry, delay
@@ -102,7 +102,7 @@ __Random__::
         max_seconds=5,
     ))
 
-Output, wait between 1 and 5 seconds (chosen randomly)::
+Output (wait times: .66s, .84s, 3.42s, .33s)::
 
     1423297137.49
     1423297138.15
@@ -117,7 +117,7 @@ Output, wait between 1 and 5 seconds (chosen randomly)::
         raise previous_exception
     Exception: House
 
-__Exponential__::
+**Exponential**::
 
     import time
     from retrypy import retry, delay
@@ -130,7 +130,7 @@ __Exponential__::
         start_at=1,
     ))
 
-Output, wait: 1, 2, 4, 8 seconds::
+Output (wait times: 1s, 2s, 4s, 8s)::
 
     1423297238.49
     1423297239.49
@@ -145,7 +145,7 @@ Output, wait: 1, 2, 4, 8 seconds::
         raise previous_exception
     Exception: House
 
-__Incremental__::
+**Incremental**::
 
     import time
     from retrypy import retry, delay
@@ -159,7 +159,7 @@ __Incremental__::
       step=1,
     ))
 
-Output, wait: 1, 2, 3, 4 seconds::
+Output (wait times: 1s, 2s, 3s, 4s)::
 
     1423297301.64
     1423297302.64
