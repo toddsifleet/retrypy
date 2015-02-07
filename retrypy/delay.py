@@ -1,4 +1,4 @@
-from random import random as _random
+from random import uniform as _random
 
 
 def random(min_seconds=0, max_seconds=5):
