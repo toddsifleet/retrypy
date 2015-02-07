@@ -175,6 +175,21 @@ Output (wait times: 1s, 2s, 3s, 4s)::
     Exception: House
 
 
+Custom Delay Functions:
+-----------------------
+You can write your own delay functions, their only requirements are that they take an ``Integer`` and return a ``Number`` of seconds to wait.
+
+::
+
+    def custom_delay(call_count):
+        if call_count == 1:
+            # don't wait at all the first time
+            return 0
+
+        # wait 4, 8, 16, 32
+        return 2 ** call_count
+
+        
 Builtin Exception Checkers:
 ---------------------------
 
