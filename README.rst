@@ -111,10 +111,11 @@ Output (wait times: .66s, .84s, 3.42s, .33s)::
     1423297142.74
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
-      File "retrypy/retry.py", line 63, in call
+      File "retrypy/retry.py", line 62, in call
         wait,
-      File "retrypy/retry.py", line 29, in _retry
-        raise previous_exception
+      File "retrypy/retry.py", line 22, in _retry
+        return func()
+      File "<stdin>", line 3, in dummy_func
     Exception: House
 
 **Exponential**::
@@ -139,10 +140,11 @@ Output (wait times: 1s, 2s, 4s, 8s)::
     1423297253.5
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
-      File "retrypy/retry.py", line 63, in call
+      File "retrypy/retry.py", line 62, in call
         wait,
-      File "retrypy/retry.py", line 29, in _retry
-        raise previous_exception
+      File "retrypy/retry.py", line 22, in _retry
+        return func()
+      File "<stdin>", line 3, in dummy_func
     Exception: House
 
 **Incremental**::
@@ -168,10 +170,11 @@ Output (wait times: 1s, 2s, 3s, 4s)::
     1423297311.65
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
-      File "retrypy/retry.py", line 63, in call
+      File "retrypy/retry.py", line 62, in call
         wait,
-      File "retrypy/retry.py", line 29, in _retry
-        raise previous_exception
+      File "retrypy/retry.py", line 22, in _retry
+        return func()
+      File "<stdin>", line 3, in dummy_func
     Exception: House
 
 

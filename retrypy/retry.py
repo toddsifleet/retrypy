@@ -17,17 +17,15 @@ def _wait(wait, count):
 
 
 def _retry(func, exceptions, check, times, wait):
-    previous_exception = None
     for n in xrange(1, times + 1):
         try:
             return func()
         except tuple(exceptions) as e:
             if check and not check(e, n):
-                raise e
-            previous_exception = e
+                raise
         if n < times:
             _wait(wait, n)
-    raise previous_exception
+    raise
 
 
 def call(
