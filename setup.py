@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 import retrypy
 
@@ -10,7 +10,10 @@ setup(
     long_description=long_description,
     name='retrypy',
     version=retrypy.__version__,
-    author='Todd Siflet',
+    author='Todd Sifleet',
     author_email='todd.siflet@gmail.com',
-    py_modules=['retrypy.retry'],
+    packages=['retrypy'],
+    zip_safe=True,
+    license='MIT',
+    url='https://github.com/toddsifleet/retrypy',
 )
