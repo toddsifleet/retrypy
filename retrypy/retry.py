@@ -1,6 +1,9 @@
 from time import sleep
+import sys
 from functools import partial, wraps
 from numbers import Number
+
+import six
 
 
 try:
@@ -17,17 +20,16 @@ def _wait(wait, count):
 
 
 def _retry(func, exceptions, check, times, wait):
-    previous_exception = None
     for n in xrange(1, times + 1):
         try:
             return func()
         except tuple(exceptions) as e:
+            exception_info = sys.exc_info()
             if check and not check(e, n):
-                raise e
-            previous_exception = e
+                six.reraise(*exception_info)
         if n < times:
             _wait(wait, n)
-    raise previous_exception
+    six.reraise(*exception_info)
 
 
 def call(
