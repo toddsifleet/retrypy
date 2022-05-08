@@ -21,6 +21,18 @@ def test_exponential_grows_exponentialy():
     assert func(4) == 16
 
 
+def test_fibonacci_grows_by_fibonacci():
+    func = retrypy.delay.fibonacci(7)
+
+    assert func(1) == 1
+    assert func(2) == 1
+    assert func(3) == 2
+    assert func(4) == 3
+    assert func(5) == 5
+    assert func(6) == 8
+    assert func(7) == 13
+
+
 def test_incremental_grows_by_step():
     func = retrypy.delay.incremental(2, 3)
 
